@@ -21,7 +21,7 @@ package org.wso2.carbon.security.util;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.base.IdentityRuntimeException;
+import org.wso2.carbon.security.keystore.KeyStoreRuntimeException;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -143,9 +143,9 @@ public class KeyStoreMgtUtil {
      *
      * @param tenantDomain tenant domain
      * @return tenant id
-     * @throws IdentityRuntimeException if an error occurs while retrieving the tenant id
+     * @throws KeyStoreRuntimeException if an error occurs while retrieving the tenant id
      */
-    public static int getTenantId(String tenantDomain) throws IdentityRuntimeException {
+    public static int getTenantId(String tenantDomain) throws KeyStoreRuntimeException {
 
         int tenantId = MultitenantConstants.INVALID_TENANT_ID;
         try {
@@ -157,11 +157,11 @@ public class KeyStoreMgtUtil {
             // level once more without adding any valuable contextual information. Because we don't have exception
             // enrichment properly implemented, we are appending the error message from the UserStoreException to the
             // new message
-            throw IdentityRuntimeException.error("Error occurred while retrieving tenantId for tenantDomain: " +
+            throw KeyStoreRuntimeException.error("Error occurred while retrieving tenantId for tenantDomain: " +
                     tenantDomain + e.getMessage(), e);
         }
         if(tenantId == MultitenantConstants.INVALID_TENANT_ID){
-            throw IdentityRuntimeException.error("Invalid tenant domain " + tenantDomain);
+            throw KeyStoreRuntimeException.error("Invalid tenant domain " + tenantDomain);
         } else {
             return tenantId;
         }
@@ -172,9 +172,9 @@ public class KeyStoreMgtUtil {
      *
      * @param tenantId  Tenant ID.
      * @return          Tenant object.
-     * @throws IdentityRuntimeException Error when retrieve tenant information.
+     * @throws KeyStoreRuntimeException Error when retrieve tenant information.
      */
-    public static Tenant getTenant(int tenantId) throws IdentityRuntimeException {
+    public static Tenant getTenant(int tenantId) throws KeyStoreRuntimeException {
 
         Tenant tenant = null;
         try {
@@ -182,11 +182,11 @@ public class KeyStoreMgtUtil {
                 tenant = realmService.getTenantManager().getTenant(tenantId);
             }
         } catch (UserStoreException e) {
-            throw IdentityRuntimeException.error("Error occurred while retrieving tenant for tenantId: " +
+            throw KeyStoreRuntimeException.error("Error occurred while retrieving tenant for tenantId: " +
                     tenantId + e.getMessage(), e);
         }
         if (tenant == null){
-            throw IdentityRuntimeException.error("Invalid tenantId: " + tenantId);
+            throw KeyStoreRuntimeException.error("Invalid tenantId: " + tenantId);
         } else {
             return tenant;
         }
