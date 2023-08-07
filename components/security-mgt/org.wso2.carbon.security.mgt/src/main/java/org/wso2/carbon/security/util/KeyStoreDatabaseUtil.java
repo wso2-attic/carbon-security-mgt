@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.security.util;
 
-import org.wso2.carbon.security.keystore.persistance.KeyStoreJDBCPersistenceManager;
 import org.wso2.carbon.security.keystore.KeyStoreRuntimeException;
+import org.wso2.carbon.security.keystore.persistance.RegistryDataPersistenceManager;
 
 import java.sql.Connection;
 
@@ -41,7 +41,7 @@ public class KeyStoreDatabaseUtil {
      */
     public static Connection getDBConnection(boolean shouldApplyTransaction) throws KeyStoreRuntimeException {
 
-        return KeyStoreJDBCPersistenceManager.getInstance().getDBConnection(shouldApplyTransaction);
+        return RegistryDataPersistenceManager.getInstance().getDBConnection(shouldApplyTransaction);
     }
 
     /**
@@ -49,7 +49,7 @@ public class KeyStoreDatabaseUtil {
      */
     public static void rollbackTransaction(Connection dbConnection) {
 
-        KeyStoreJDBCPersistenceManager.getInstance().rollbackTransaction(dbConnection);
+        RegistryDataPersistenceManager.getInstance().rollbackTransaction(dbConnection);
     }
 
     /**
@@ -57,6 +57,6 @@ public class KeyStoreDatabaseUtil {
      */
     public static void commitTransaction(Connection dbConnection) {
 
-        KeyStoreJDBCPersistenceManager.getInstance().commitTransaction(dbConnection);
+        RegistryDataPersistenceManager.getInstance().commitTransaction(dbConnection);
     }
 }

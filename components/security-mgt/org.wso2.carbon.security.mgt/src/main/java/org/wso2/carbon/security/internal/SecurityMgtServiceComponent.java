@@ -41,6 +41,7 @@ import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.SecurityServiceHolder;
 import org.wso2.carbon.security.keystore.KeyStoreManagementService;
 import org.wso2.carbon.security.keystore.KeyStoreManagementServiceImpl;
+import org.wso2.carbon.security.keystore.persistance.RegistryDataPersistenceManager;
 import org.wso2.carbon.security.util.KeyStoreMgtUtil;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -67,6 +68,20 @@ public class SecurityMgtServiceComponent {
                     null);
             try {
                 addKeystores();
+
+                // todo: add SKIP_DB_SCHEMA_CREATION config.
+                // todo: check with what this can be replaced with. and how to handle the two jdbc
+                //      persistence managers works
+                RegistryDataPersistenceManager registryDataPersistenceManager = RegistryDataPersistenceManager.getInstance();
+                if (System.getProperty("setup") == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Identity Database schema initialization check was skipped since " +
+                                "\'setup\' variable was not given during startup");
+                    }
+                } else {
+                    RegistryDataPersistenceManager.initializeDatabase();
+                }
+
             } catch (Exception e) {
                 String msg = "Error while adding key stores.";
                 log.error(msg, e);

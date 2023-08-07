@@ -42,48 +42,42 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * This class is used for handling identity meta data persistence in the Identity JDBC Store. During
- * the server start-up, it checks whether the database is created, if not it creates one. It reads
- * the data source properties from the identity.xml.
- * This is implemented as a singleton. An instance of this class can be obtained through
- * JDBCPersistenceManager.getInstance() method.
+ * This class is used to get the database connection for shared registry.
  */
-public class KeyStoreJDBCPersistenceManager {
+public class RegistryDataPersistenceManager {
 
-    public static final String SESSION_DATA_PERSIST = "SessionDataPersist";
-    public static final String DATA_SOURCE = "DataSource";
-    // Todo: check the possibility of using the shared db instead of identity db.
-    public static final String DEFAULT_NAMESPACE = "http://wso2.org/projects/carbon/carbon.xml";
-    public static final String IDENTITY_CONFIG = "identity.xml";
-    public static final String NAME = "Name";
-    private static Log log = LogFactory.getLog(KeyStoreJDBCPersistenceManager.class);
-    private static volatile KeyStoreJDBCPersistenceManager instance;
+    private static Log log = LogFactory.getLog(RegistryDataPersistenceManager.class);
+
+    private static volatile RegistryDataPersistenceManager instance;
+
     private static DataSource dataSource;
-    private DataSource sessionDataSource;
-    // This property refers to Active transaction state of postgresql db
+
+    public static final String DATA_SOURCE = "DataSource";
+    public static final String NAME = "Name";
     private static final String PG_ACTIVE_SQL_TRANSACTION_STATE = "25001";
     private static final String POSTGRESQL_DATABASE = "PostgreSQL";
+    public static final String DEFAULT_NAMESPACE = "http://wso2.org/projects/carbon/carbon.xml";
+    public static final String IDENTITY_CONFIG = "identity.xml";
 
-    private KeyStoreJDBCPersistenceManager() {
+    /**
+     * Private constructor which will not allow to create objects of this class from outside
+     */
+    private RegistryDataPersistenceManager() {
 
         initDataSource();
     }
 
     /**
-     * Get an instance of the JDBCPersistenceManager. It implements a lazy
-     * initialization with double
-     * checked locking, because it is initialized first by identity.core module
-     * during the start up.
+     * Singleton method
      *
-     * @return JDBCPersistenceManager instance
-     * @throws KeyStoreRuntimeException Error when reading the data source configurations
+     * @return RegistryDataPersistenceManager
      */
-    public static KeyStoreJDBCPersistenceManager getInstance() {
+    public static RegistryDataPersistenceManager getInstance() {
 
         if (instance == null) {
-            synchronized (KeyStoreJDBCPersistenceManager.class) {
+            synchronized (RegistryDataPersistenceManager.class) {
                 if (instance == null) {
-                    instance = new KeyStoreJDBCPersistenceManager();
+                    instance = new RegistryDataPersistenceManager();
                 }
             }
         }
@@ -101,7 +95,8 @@ public class KeyStoreJDBCPersistenceManager {
             try (InputStream inStream = new FileInputStream(identityConfigXml)) {
                 builder = new StAXOMBuilder(inStream);
                 rootElement = builder.getDocumentElement();
-                return rootElement.getFirstChildWithName(new QName(DEFAULT_NAMESPACE, "JDBCPersistenceManager"));
+                return rootElement.getFirstChildWithName(new QName(DEFAULT_NAMESPACE,
+                        "RegistryDataPersistenceManager"));
             } catch (FileNotFoundException | XMLStreamException e) {
                 try {
                     throw new KeyStoreException("Error while reading identity configuration file.", e);
@@ -115,14 +110,16 @@ public class KeyStoreJDBCPersistenceManager {
         return null;
     }
 
+    /**
+     * Initialize the datasource
+     */
     private void initDataSource() {
 
         OMElement persistenceManagerConfigElem = getJDBCPersistenceManagerConfigElement();
         try {
             if (persistenceManagerConfigElem == null) {
-                String errorMsg = "Identity Persistence Manager configuration is not available in " +
-                        "identity.xml file. Terminating the JDBC Persistence Manager " +
-                        "initialization. This may affect certain functionality.";
+                String errorMsg = "Registry Data Persistence Manager configuration is not available in " +
+                        "identity.xml file. Terminating the initialization. This may affect certain functionality.";
                 throw KeyStoreRuntimeException.error(errorMsg);
             }
 
@@ -130,8 +127,8 @@ public class KeyStoreJDBCPersistenceManager {
                     new QName(DEFAULT_NAMESPACE, DATA_SOURCE));
 
             if (dataSourceElem == null) {
-                String errorMsg = "DataSource Element is not available for JDBC Persistence " +
-                        "Manager in identity.xml file. Terminating the JDBC Persistence Manager " +
+                String errorMsg = "DataSource Element is not available for Registry Data Persistence " +
+                        "Manager in identity.xml file. Terminating the Registry Data Persistence Manager " +
                         "initialization. This might affect certain features.";
                 throw KeyStoreRuntimeException.error(errorMsg);
             }
@@ -144,58 +141,14 @@ public class KeyStoreJDBCPersistenceManager {
                 Context ctx = new InitialContext();
                 dataSource = (DataSource) ctx.lookup(dataSourceName);
             }
-            OMElement sessionPersistElem = persistenceManagerConfigElem.getFirstChildWithName(
-                    new QName(DEFAULT_NAMESPACE, SESSION_DATA_PERSIST));
-            OMElement sessionDataSourceElem = sessionPersistElem.getFirstChildWithName(
-                    new QName(DEFAULT_NAMESPACE, DATA_SOURCE));
-            if (sessionDataSourceElem != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Session datasource is configured, and using: " + sessionDataSourceElem.getText());
-                }
-                OMElement sessionDataSourceNameElem = sessionDataSourceElem.getFirstChildWithName(
-                        new QName(DEFAULT_NAMESPACE, NAME));
-                if (sessionDataSourceNameElem != null) {
-                    String dataSourceName = sessionDataSourceNameElem.getText();
-                    Context ctx = new InitialContext();
-                    sessionDataSource = (DataSource) ctx.lookup(dataSourceName);
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Using default identity datasource since the different session data source is " +
-                            "not configured");
-                }
-                sessionDataSource = dataSource;
-            }
         } catch (NamingException e) {
-            String errorMsg = "Error when looking up the Identity Data Source.";
+            String errorMsg = "Error when looking up the Registry Data Source.";
             throw KeyStoreRuntimeException.error(errorMsg, e);
         }
     }
 
-    public static void initializeDatabase() {
-
-        DBInitializer dbInitializer = new DBInitializer(dataSource);
-        dbInitializer.createIdentityDatabase();
-    }
-
     /**
-     * Returns an database connection for Identity data source.
-     *
-     * @return dbConnection
-     * @throws KeyStoreRuntimeException
-     * @Deprecated The getDBConnection should handle both transaction and non-transaction connection. Earlier it
-     * handle only the transactionConnection. Therefore this method was deprecated and changed as handle both
-     * transaction and non-transaction connection. getDBConnection(boolean shouldApplyTransaction) method used as
-     * alternative of this method.
-     */
-    @Deprecated
-    public Connection getDBConnection() throws KeyStoreRuntimeException {
-
-        return getDBConnection(true);
-    }
-
-    /**
-     * Returns an database connection for Identity data source.
+     * Returns a database connection for shared registry data source.
      *
      * @param shouldApplyTransaction apply transaction or not
      * @return Database connection.
@@ -222,62 +175,25 @@ public class KeyStoreJDBCPersistenceManager {
             }
             return dbConnection;
         } catch (SQLException e) {
-            String errMsg = "Error when getting a database connection object from the Identity data source.";
+            String errMsg = "Error when getting a database connection object from the Shared data source.";
             throw KeyStoreDBConnectionException.error(errMsg, e);
         }
     }
 
-    /**
-     * Returns an database connection for Session data source.
-     *
-     * @param shouldApplyTransaction apply transaction or not
-     * @return Database connection.
-     * @throws KeyStoreRuntimeException Exception occurred when getting the data source.
-     */
-    public Connection getSessionDBConnection(boolean shouldApplyTransaction) throws KeyStoreRuntimeException {
+    public static void initializeDatabase() {
 
-        try {
-            Connection dbConnection = sessionDataSource.getConnection();
-            if (shouldApplyTransaction) {
-                dbConnection.setAutoCommit(false);
-                try {
-                    dbConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-                } catch (SQLException e) {
-                    // Handling startup error for postgresql
-                    // Active SQL Transaction means that connection is not committed.
-                    // Need to commit before setting isolation property.
-                    if (dbConnection.getMetaData().getDriverName().contains(POSTGRESQL_DATABASE)
-                            && PG_ACTIVE_SQL_TRANSACTION_STATE.equals(e.getSQLState())) {
-                        dbConnection.commit();
-                        dbConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-                    }
-                }
-            }
-            return dbConnection;
-        } catch (SQLException e) {
-            String errMsg = "Error when getting a database connection object from the Session data source.";
-            throw KeyStoreRuntimeException.error(errMsg, e);
-        }
+        DBInitializer dbInitializer = new DBInitializer(dataSource);
+        dbInitializer.createIdentityDatabase();
     }
 
     /**
-     * Returns Identity data source.
+     * Get the registry datasource.
      *
-     * @return Data source.
+     * @return DataSource.
      */
     public DataSource getDataSource() {
 
         return dataSource;
-    }
-
-    /**
-     * Returns Session data source.
-     *
-     * @return Data source.
-     */
-    public DataSource getSessionDataSource() {
-
-        return sessionDataSource;
     }
 
     /**

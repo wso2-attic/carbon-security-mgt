@@ -62,7 +62,7 @@ public class KeyStoreAdminClient {
     private KeyStoreAdminServiceStub stub = null;
 
     public KeyStoreAdminClient(String cookie, String url, ConfigurationContext configContext)
-            throws Exception {
+            throws java.lang.Exception {
 
         try {
             this.serviceEndPoint = url + "KeyStoreAdminService";
@@ -78,19 +78,19 @@ public class KeyStoreAdminClient {
 
     }
 
-    public KeyStoreData[] getKeyStores() throws Exception {
+    public KeyStoreData[] getKeyStores() throws java.lang.Exception {
 
         try {
             GetKeyStoresResponse response = stub.getKeyStores();
             return response.get_return();
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in getting keystore data", e);
             throw e;
         }
     }
 
     public void addKeyStore(byte[] content, String filename, String password, String provider,
-                            String type, String pvtkspass) throws Exception {
+                            String type, String pvtkspass) throws java.lang.Exception {
 
         try {
             String data = Base64.encode(content);
@@ -102,7 +102,7 @@ public class KeyStoreAdminClient {
             request.setType(type);
             request.setPvtkeyPass(pvtkspass);
             stub.addKeyStore(request);
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in adding keystore", e);
             throw e;
         }
@@ -121,25 +121,25 @@ public class KeyStoreAdminClient {
             request.setProvider(provider);
             request.setType(type);
             stub.addTrustStore(request);
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in adding truststore", e);
         }
     }
 
-    public void deleteStore(String keyStoreName) throws Exception {
+    public void deleteStore(String keyStoreName) throws java.lang.Exception {
 
         try {
             DeleteStore request = new DeleteStore();
             request.setKeyStoreName(keyStoreName);
             stub.deleteStore(request);
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in deleting keystore", e);
             throw e;
         }
     }
 
     public void importCertToStore(String filename, byte[] content, String keyStoreName)
-            throws Exception {
+            throws java.lang.Exception {
 
         try {
             String data = Base64.encode(content);
@@ -148,26 +148,26 @@ public class KeyStoreAdminClient {
             request.setFileData(data);
             request.setKeyStoreName(keyStoreName);
             stub.importCertToStore(request);
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in importing cert to store.", e);
             throw e;
         }
     }
 
-    public String[] getStoreEntries(String keyStoreName) throws Exception {
+    public String[] getStoreEntries(String keyStoreName) throws java.lang.Exception {
 
         try {
             GetStoreEntries request = new GetStoreEntries();
             request.setKeyStoreName(keyStoreName);
             GetStoreEntriesResponse response = stub.getStoreEntries(request);
             return response.get_return();
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in getting store entries.", e);
             throw e;
         }
     }
 
-    private byte[] getBytesFromFile(File file) throws Exception {
+    private byte[] getBytesFromFile(File file) throws java.lang.Exception {
 
         InputStream is = new FileInputStream(file);
         try {
@@ -193,7 +193,7 @@ public class KeyStoreAdminClient {
                 throw new IOException("Could not completely read file " + file.getName());
             }
             return bytes;
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in getting bytes from file.", e);
             throw e;
         } finally {
@@ -202,7 +202,7 @@ public class KeyStoreAdminClient {
     }
 
     public boolean isPrivateKeyStore(byte[] content, String password, String type)
-            throws Exception {
+            throws java.lang.Exception {
 
         try {
             boolean isPrivateStore = false;
@@ -218,40 +218,40 @@ public class KeyStoreAdminClient {
                 }
             }
             return isPrivateStore;
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in checking private key store.", e);
             throw e;
         }
     }
 
-    public KeyStoreData getKeystoreInfo(String keyStoreName) throws Exception {
+    public KeyStoreData getKeystoreInfo(String keyStoreName) throws java.lang.Exception {
 
         try {
             GetKeystoreInfo request = new GetKeystoreInfo();
             request.setKeyStoreName(keyStoreName);
             GetKeystoreInfoResponse response = stub.getKeystoreInfo(request);
             return response.get_return();
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in getting keystore info.", e);
             throw e;
         }
     }
 
-    public void removeCertificateFromKeyStore(String keySoreName, String certificateAlias) throws Exception {
+    public void removeCertificateFromKeyStore(String keySoreName, String certificateAlias) throws java.lang.Exception {
 
         RemoveCertFromStore request = new RemoveCertFromStore();
         request.setKeyStoreName(keySoreName);
         request.setAlias(certificateAlias);
         try {
             stub.removeCertFromStore(request);
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in removing certificate from keystore.", e);
             throw e;
         }
     }
 
     public PaginatedKeyStoreData getPaginatedKeystoreInfo(String keyStoreName, int pageNumber)
-            throws Exception {
+            throws java.lang.Exception {
 
         try {
             GetPaginatedKeystoreInfo request = new GetPaginatedKeystoreInfo();
@@ -260,7 +260,7 @@ public class KeyStoreAdminClient {
 
             GetPaginatedKeystoreInfoResponse response = stub.getPaginatedKeystoreInfo(request);
             return response.get_return();
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error("Error in getting paginated keystore info.", e);
             throw e;
         }
@@ -273,10 +273,10 @@ public class KeyStoreAdminClient {
      * @param pageNumber   Page number.
      * @param filter Filter text.
      * @return Paginated keystore data with certificates.
-     * @throws Exception
+     * @throws java.lang.Exception
      */
     public PaginatedKeyStoreData getFilteredPaginatedKeyStoreInfo(String keyStoreName, int pageNumber,
-                                                                  String filter) throws Exception {
+                                                                  String filter) throws java.lang.Exception {
 
         try {
             GetFilteredPaginatedKeyStoreInfo request = new GetFilteredPaginatedKeyStoreInfo();
@@ -286,7 +286,7 @@ public class KeyStoreAdminClient {
 
             GetFilteredPaginatedKeyStoreInfoResponse response = stub.getFilteredPaginatedKeyStoreInfo(request);
             return response.get_return();
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             throw e;
         }
     }

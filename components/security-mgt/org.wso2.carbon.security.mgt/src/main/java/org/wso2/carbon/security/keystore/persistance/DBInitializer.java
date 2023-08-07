@@ -43,7 +43,7 @@ import javax.sql.DataSource;
  */
 public class DBInitializer {
 
-    // todo: change this to any configured DB: shared/identity
+    // Todo: change this to any configured DB: shared/identity
     private static final String DB_CHECK_SQL = "SELECT * FROM IDN_BASE_TABLE";
     private static Log log = LogFactory.getLog(DBInitializer.class);
     Statement statement;
@@ -54,7 +54,7 @@ public class DBInitializer {
         this.dataSource = dataSource;
     }
 
-    public static String getDatabaseType(Connection conn) throws KeyStoreRuntimeException {
+    public static String getDatabaseType(Connection conn) throws KeyStoreRuntimeException{
         String type = null;
         try {
             if (conn != null && (!conn.isClosed())) {
@@ -378,4 +378,5 @@ public class DBInitializer {
             }
         }
     }
+
 }
