@@ -29,15 +29,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.wso2.carbon.core.RegistryResources;
-import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.utils.Transaction;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
-import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.SecurityServiceHolder;
 import org.wso2.carbon.security.keystore.KeyStoreManagementService;
 import org.wso2.carbon.security.keystore.KeyStoreManagementServiceImpl;
@@ -51,10 +42,9 @@ import org.wso2.carbon.utils.ConfigurationContextService;
         immediate = true
 )
 public class SecurityMgtServiceComponent {
-    private static String POX_SECURITY_MODULE = "POXSecurityModule";
+
     private static final Log log = LogFactory.getLog(SecurityMgtServiceComponent.class);
     private static ConfigurationContextService configContextService = null;
-    private static RegistryService registryService;
 
     public static ConfigurationContext getServerConfigurationContext() {
         return configContextService.getServerConfigContext();
@@ -67,8 +57,6 @@ public class SecurityMgtServiceComponent {
             bundleCtx.registerService(KeyStoreManagementService.class.getName(), new KeyStoreManagementServiceImpl(),
                     null);
             try {
-                addKeystores();
-
                 // todo: add SKIP_DB_SCHEMA_CREATION config.
                 // todo: check with what this can be replaced with. and how to handle the two jdbc
                 //      persistence managers works
@@ -115,21 +103,6 @@ public class SecurityMgtServiceComponent {
     }
 
     @Reference(
-            name = "registry.service",
-            service = RegistryService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRegistryService"
-    )
-    protected void setRegistryService(RegistryService registryService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting the RegistryService");
-        }
-        this.registryService = registryService;
-        SecurityServiceHolder.setRegistryService(registryService);
-    }
-
-    @Reference(
             name = "user.realmservice.default",
             service = RealmService.class,
             cardinality = ReferenceCardinality.MANDATORY,
@@ -158,64 +131,5 @@ public class SecurityMgtServiceComponent {
         }
         this.configContextService = null;
         SecurityServiceHolder.setConfigurationContextService(contextService);
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Unsetting the RegistryService");
-        }
-        this.registryService = registryService;
-        SecurityServiceHolder.setRegistryService(registryService);  // TODO: Serious OSGi bug here. FIXME Thilina
-    }
-
-    @Reference(
-            name = "registry.loader.default",
-            service = TenantRegistryLoader.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetTenantRegistryLoader"
-    )
-    protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
-        if (log.isDebugEnabled()) {
-            log.debug("Tenant Registry Loader is set in the SAML SSO bundle");
-        }
-        SecurityServiceHolder.setTenantRegistryLoader(tenantRegistryLoader);
-    }
-
-    protected void unsetTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
-        if (log.isDebugEnabled()) {
-            log.debug("Tenant Registry Loader is unset in the SAML SSO bundle");
-        }
-        SecurityServiceHolder.setTenantRegistryLoader(null);
-    }
-
-    public static RegistryService getRegistryService(){
-        return registryService;
-    }
-
-    private void addKeystores() throws RegistryException {
-        Registry registry = SecurityServiceHolder.getRegistryService().getGovernanceSystemRegistry();
-        try {
-            boolean transactionStarted = Transaction.isStarted();
-            if (!transactionStarted) {
-                registry.beginTransaction();
-            }
-            if (!registry.resourceExists(SecurityConstants.KEY_STORES)) {
-                Collection kstores = registry.newCollection();
-                registry.put(SecurityConstants.KEY_STORES, kstores);
-
-                Resource primResource = registry.newResource();
-                if (!registry.resourceExists(RegistryResources.SecurityManagement.PRIMARY_KEYSTORE_PHANTOM_RESOURCE)) {
-                    registry.put(RegistryResources.SecurityManagement.PRIMARY_KEYSTORE_PHANTOM_RESOURCE,
-                            primResource);
-                }
-            }
-            if (!transactionStarted) {
-                registry.commitTransaction();
-            }
-        } catch (Exception e) {
-            registry.rollbackTransaction();
-            throw e;
-        }
     }
 }

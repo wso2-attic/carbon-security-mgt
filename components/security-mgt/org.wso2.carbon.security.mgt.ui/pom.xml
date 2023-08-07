@@ -87,7 +87,6 @@
                             org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
                             org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
                             org.osgi.util.tracker; version="${osgi.util.tracker.imp.pkg.version.range}",
-                            org.wso2.carbon.registry.core.*; version="${carbon.kernel.registry.imp.pkg.version}",
                             org.wso2.carbon.security.mgt.stub.*;
                             version="${carbon.identity.package.import.version.range}",
                             org.wso2.carbon.identity.sts.common.stub.config.*;
@@ -97,7 +96,7 @@
                             version="${carbon.identity.package.import.version.range}"
                         </Import-Package>
                         <Export-Package>
-                            org.wso2.carbon.security.ui.*; version="${carbon.identity.package.export.version}"
+                            org.wso2.carbon.security.ui.*; version="${security.mgt.package.export.version}"
                         </Export-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
                     </instructions>

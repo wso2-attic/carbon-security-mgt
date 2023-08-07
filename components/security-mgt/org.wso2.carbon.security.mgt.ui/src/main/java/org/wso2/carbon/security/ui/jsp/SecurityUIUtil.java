@@ -25,11 +25,6 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
-import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.security.ui.ServiceHolder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -45,29 +40,6 @@ public class SecurityUIUtil {
     private static String url = null;
 
     private SecurityUIUtil() {
-    }
-
-    public static String getUrl() throws Exception {
-
-        if (url == null) {
-            ServiceHolder serviceHodler = ServiceHolder.getInstance();
-            RegistryService regService = serviceHodler.getRegistryService();
-            Registry systemRegistry = regService.getConfigSystemRegistry();
-            Resource resource = systemRegistry.get("/carbon/connection/props");
-            String servicePath = resource.getProperty("service-path");
-            String contextRoot = resource.getProperty("context-root");
-
-            String host = resource.getProperty("host-name");
-            contextRoot = StringUtils.equals("/", contextRoot) ? "" : contextRoot;
-
-            host = (host == null) ? "localhost" : host;
-            String port = System.getProperty("carbon.https.port");
-            StringBuilder urlValue = new StringBuilder();
-            url = (urlValue.append("https://").append(host).append(":").append(port).append("/")
-                    .append(contextRoot).append(servicePath).append("/")).toString();
-        }
-
-        return url;
     }
 
     public static List parseRequest(ServletRequestContext requestContext)
