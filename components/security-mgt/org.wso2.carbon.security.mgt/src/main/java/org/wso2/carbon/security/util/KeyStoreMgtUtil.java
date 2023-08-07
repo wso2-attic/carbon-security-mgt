@@ -21,9 +21,13 @@ package org.wso2.carbon.security.util;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.core.util.IdentityIOStreamUtils;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.WSO2Constants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,8 +39,32 @@ import java.util.Map;
 public class KeyStoreMgtUtil {
 
     private static final Log log = LogFactory.getLog(KeyStoreMgtUtil.class);
+    private static RealmService realmService;
 
+    // System Property constant for trust managers.
+    public static final String PROP_TRUST_STORE_UPDATE_REQUIRED =
+            "org.wso2.carbon.identity.core.util.TRUST_STORE_UPDATE_REQUIRED";
     private KeyStoreMgtUtil(){}
+
+    /**
+     * Get the realm service.
+     *
+     * @return realm service
+     */
+    public static RealmService getRealmService() {
+
+        return realmService;
+    }
+
+    /**
+     * Set the realm service.
+     *
+     * @param realmService realm service
+     */
+    public static void setRealmService(RealmService realmService) {
+
+        KeyStoreMgtUtil.realmService = realmService;
+    }
 
     /**
      * Dumping the generated pub. cert to a file
@@ -69,8 +97,8 @@ public class KeyStoreMgtUtil {
                 log.error(msg);
                 throw new SecurityException("msg", e);
             } finally {
-                IdentityIOStreamUtils.flushOutputStream(outStream);
-                IdentityIOStreamUtils.closeOutputStream(outStream);
+                KeyStoreIOStreamUtils.flushOutputStream(outStream);
+                KeyStoreIOStreamUtils.closeOutputStream(outStream);
             }
 
             Map fileResourcesMap = (Map) configurationContext.getProperty(WSO2Constants.FILE_RESOURCE_MAP);
@@ -110,4 +138,57 @@ public class KeyStoreMgtUtil {
         return false;
     }
 
+    /**
+     * Get the tenant id of the given tenant domain.
+     *
+     * @param tenantDomain tenant domain
+     * @return tenant id
+     * @throws IdentityRuntimeException if an error occurs while retrieving the tenant id
+     */
+    public static int getTenantId(String tenantDomain) throws IdentityRuntimeException {
+
+        int tenantId = MultitenantConstants.INVALID_TENANT_ID;
+        try {
+            if (realmService != null) {
+                tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            }
+        } catch (UserStoreException e) {
+            // Ideally user.core should be throwing an unchecked exception, in which case no need to wrap at this
+            // level once more without adding any valuable contextual information. Because we don't have exception
+            // enrichment properly implemented, we are appending the error message from the UserStoreException to the
+            // new message
+            throw IdentityRuntimeException.error("Error occurred while retrieving tenantId for tenantDomain: " +
+                    tenantDomain + e.getMessage(), e);
+        }
+        if(tenantId == MultitenantConstants.INVALID_TENANT_ID){
+            throw IdentityRuntimeException.error("Invalid tenant domain " + tenantDomain);
+        } else {
+            return tenantId;
+        }
+    }
+
+    /**
+     * Retrieve Tenant object for a given tenant ID.
+     *
+     * @param tenantId  Tenant ID.
+     * @return          Tenant object.
+     * @throws IdentityRuntimeException Error when retrieve tenant information.
+     */
+    public static Tenant getTenant(int tenantId) throws IdentityRuntimeException {
+
+        Tenant tenant = null;
+        try {
+            if (realmService != null) {
+                tenant = realmService.getTenantManager().getTenant(tenantId);
+            }
+        } catch (UserStoreException e) {
+            throw IdentityRuntimeException.error("Error occurred while retrieving tenant for tenantId: " +
+                    tenantId + e.getMessage(), e);
+        }
+        if (tenant == null){
+            throw IdentityRuntimeException.error("Invalid tenantId: " + tenantId);
+        } else {
+            return tenant;
+        }
+    }
 }

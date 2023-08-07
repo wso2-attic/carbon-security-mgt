@@ -28,7 +28,6 @@ import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.KeyStoreUtil;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.security.SecurityConfigException;
@@ -368,7 +367,7 @@ public class KeyStoreAdmin {
             updateKeyStore(keyStoreName, ks);
 
             if (isTrustStore(keyStoreName)) {
-                System.setProperty(IdentityUtil.PROP_TRUST_STORE_UPDATE_REQUIRED, "true");
+                System.setProperty(KeyStoreMgtUtil.PROP_TRUST_STORE_UPDATE_REQUIRED, "true");
             }
 
         } catch (SecurityConfigException e) {
@@ -404,7 +403,7 @@ public class KeyStoreAdmin {
             updateKeyStore(keyStoreName, ks);
 
             if (isTrustStore(keyStoreName)) {
-                System.setProperty(IdentityUtil.PROP_TRUST_STORE_UPDATE_REQUIRED, "true");
+                System.setProperty(KeyStoreMgtUtil.PROP_TRUST_STORE_UPDATE_REQUIRED, "true");
             }
 
             return alias;
@@ -435,7 +434,7 @@ public class KeyStoreAdmin {
             updateKeyStore(keyStoreName, ks);
 
             if (isTrustStore(keyStoreName)) {
-                System.setProperty(IdentityUtil.PROP_TRUST_STORE_UPDATE_REQUIRED, Boolean.TRUE.toString());
+                System.setProperty(KeyStoreMgtUtil.PROP_TRUST_STORE_UPDATE_REQUIRED, Boolean.TRUE.toString());
             }
         } catch (SecurityConfigException e) {
             throw e;

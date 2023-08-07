@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.security.keystore.dao;
 
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.security.SecurityConfigException;
+import org.wso2.carbon.security.util.KeyStoreMgtUtil;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -37,7 +37,7 @@ public class DAOUtils {
 
         // TODO: getTenant also seems to throw a runtime exception if tenant does not exist. Figure out a way to use that, or catch that and convert to SecurityConfigException
         if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-            Tenant tenant = IdentityTenantUtil.getTenant(tenantId);
+            Tenant tenant = KeyStoreMgtUtil.getTenant(tenantId);
             return tenant.getTenantUniqueID();
         }
 
