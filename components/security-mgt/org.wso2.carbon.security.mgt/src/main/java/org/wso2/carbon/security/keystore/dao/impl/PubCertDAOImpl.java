@@ -19,12 +19,12 @@
 package org.wso2.carbon.security.keystore.dao.impl;
 
 import org.wso2.carbon.database.utils.jdbc.NamedPreparedStatement;
-import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.security.SecurityConfigException;
 import org.wso2.carbon.security.keystore.dao.PubCertDAO;
 import org.wso2.carbon.security.keystore.dao.constants.PubCertDAOConstants;
 import org.wso2.carbon.security.keystore.dao.constants.PubCertDAOConstants.PubCertTableColumns;
 import org.wso2.carbon.security.keystore.model.PubCertModel;
+import org.wso2.carbon.security.util.KeyStoreDatabaseUtil;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -46,13 +46,13 @@ public class PubCertDAOImpl extends PubCertDAO {
     @Override
     public String addPubCert(PubCertModel pubCertModel) throws SecurityConfigException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(true)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(true)) {
             try {
                 String uuid = processAddPubCert(connection, pubCertModel, tenantUUID);
-                IdentityDatabaseUtil.commitTransaction(connection);
+                KeyStoreDatabaseUtil.commitTransaction(connection);
                 return uuid;
             } catch (SQLException e) {
-                IdentityDatabaseUtil.rollbackTransaction(connection);
+                KeyStoreDatabaseUtil.rollbackTransaction(connection);
                 // TODO: Check whether this exception type is okay. Also see if we need to use a server exception type. i.e something like SecurityConfigServerException
                 throw new SecurityConfigException("Error while adding public certificate.", e);
             }
@@ -67,7 +67,7 @@ public class PubCertDAOImpl extends PubCertDAO {
 
         PubCertModel pubCertModel = null;
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(false)) {
             try (NamedPreparedStatement statement = new NamedPreparedStatement(connection,
                     PubCertDAOConstants.SQLQueries.GET_PUB_CERT)) {
                 statement.setString(PubCertTableColumns.ID, uuid);

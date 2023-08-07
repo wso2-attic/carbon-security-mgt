@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2006, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2006, WSO2 LLC. (https://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -30,7 +30,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.core.RegistryResources;
-import org.wso2.carbon.identity.core.util.IdentityCoreInitializedEvent;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -42,6 +41,7 @@ import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.SecurityServiceHolder;
 import org.wso2.carbon.security.keystore.KeyStoreManagementService;
 import org.wso2.carbon.security.keystore.KeyStoreManagementServiceImpl;
+import org.wso2.carbon.security.util.KeyStoreMgtUtil;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -53,7 +53,6 @@ public class SecurityMgtServiceComponent {
     private static String POX_SECURITY_MODULE = "POXSecurityModule";
     private static final Log log = LogFactory.getLog(SecurityMgtServiceComponent.class);
     private static ConfigurationContextService configContextService = null;
-    private static RealmService realmService;
     private static RegistryService registryService;
 
     public static ConfigurationContext getServerConfigurationContext() {
@@ -126,7 +125,7 @@ public class SecurityMgtServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("Setting the RealmService");
         }
-        this.realmService = realmService;
+        KeyStoreMgtUtil.setRealmService(realmService);
         SecurityServiceHolder.setRealmService(realmService);
     }
 
@@ -134,7 +133,7 @@ public class SecurityMgtServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("Unsetting the RealmService");
         }
-        this.realmService = null;
+        KeyStoreMgtUtil.setRealmService(null);
         SecurityServiceHolder.setRealmService(null);
     }
 
@@ -173,23 +172,6 @@ public class SecurityMgtServiceComponent {
             log.debug("Tenant Registry Loader is unset in the SAML SSO bundle");
         }
         SecurityServiceHolder.setTenantRegistryLoader(null);
-    }
-
-    @Reference(
-            name = "identityCoreInitializedEventService",
-            service = IdentityCoreInitializedEvent.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetIdentityCoreInitializedEventService"
-    )
-    protected void setIdentityCoreInitializedEventService(IdentityCoreInitializedEvent identityCoreInitializedEvent) {
-        /* reference IdentityCoreInitializedEvent service to guarantee that this component will wait until identity core
-         is started */
-    }
-
-    protected void unsetIdentityCoreInitializedEventService(IdentityCoreInitializedEvent identityCoreInitializedEvent) {
-        /* reference IdentityCoreInitializedEvent service to guarantee that this component will wait until identity core
-         is started */
     }
 
     public static RegistryService getRegistryService(){

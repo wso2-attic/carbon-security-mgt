@@ -19,12 +19,12 @@
 package org.wso2.carbon.security.keystore.dao.impl;
 
 import org.wso2.carbon.database.utils.jdbc.NamedPreparedStatement;
-import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.security.SecurityConfigException;
 import org.wso2.carbon.security.keystore.dao.KeyStoreDAO;
 import org.wso2.carbon.security.keystore.dao.constants.KeyStoreDAOConstants;
 import org.wso2.carbon.security.keystore.dao.constants.KeyStoreDAOConstants.KeyStoreTableColumns;
 import org.wso2.carbon.security.keystore.model.KeyStoreModel;
+import org.wso2.carbon.security.util.KeyStoreDatabaseUtil;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -55,13 +55,13 @@ public class KeyStoreDAOImpl extends KeyStoreDAO {
     @Override
     public void addKeyStore(KeyStoreModel keyStoreModel) throws SecurityConfigException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(true)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(true)) {
             try {
                 processAddKeyStore(connection, keyStoreModel);
-                IdentityDatabaseUtil.commitTransaction(connection);
+                KeyStoreDatabaseUtil.commitTransaction(connection);
             } catch (SQLException e) {
-                IdentityDatabaseUtil.rollbackTransaction(connection);
-                // TODO: Check whether this exception type is okay. Also see if we need to use a server exception type. i.e something like SecurityConfigServerException
+                KeyStoreDatabaseUtil.rollbackTransaction(connection);
+                // TODO:  whether this exception type is okay. Also see if we need to use a server exception type. i.e something like SecurityConfigServerException
                 throw new SecurityConfigException("Error while adding key store.", e);
             }
         } catch (SQLException e) {
@@ -75,7 +75,7 @@ public class KeyStoreDAOImpl extends KeyStoreDAO {
 
         List<KeyStoreModel> keyStores = new ArrayList<>();
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(false)) {
             try (NamedPreparedStatement statement = new NamedPreparedStatement(connection,
                     KeyStoreDAOConstants.SqlQueries.GET_KEY_STORES)) {
                 statement.setString(KeyStoreTableColumns.TENANT_UUID, tenantUUID);
@@ -97,7 +97,7 @@ public class KeyStoreDAOImpl extends KeyStoreDAO {
     @Override
     public Optional<KeyStoreModel> getKeyStore(String fileName) throws SecurityConfigException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(false)) {
             try (NamedPreparedStatement statement = new NamedPreparedStatement(connection,
                     KeyStoreDAOConstants.SqlQueries.GET_KEY_STORE_BY_FILE_NAME)) {
                 statement.setString(KeyStoreTableColumns.FILE_NAME, fileName);
@@ -119,16 +119,16 @@ public class KeyStoreDAOImpl extends KeyStoreDAO {
     @Override
     public void deleteKeyStore(String fileName) throws SecurityConfigException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(true)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(true)) {
             try (NamedPreparedStatement statement = new NamedPreparedStatement(connection,
                     KeyStoreDAOConstants.SqlQueries.DELETE_KEY_STORE_BY_FILE_NAME)) {
                 statement.setString(KeyStoreTableColumns.FILE_NAME, fileName);
                 statement.setString(KeyStoreTableColumns.TENANT_UUID, tenantUUID);
                 statement.executeUpdate();
 
-                IdentityDatabaseUtil.commitTransaction(connection);
+                KeyStoreDatabaseUtil.commitTransaction(connection);
             } catch (SQLException e) {
-                IdentityDatabaseUtil.rollbackTransaction(connection);
+                KeyStoreDatabaseUtil.rollbackTransaction(connection);
                 throw new SecurityConfigException("Error while deleting key store.", e);
             }
         } catch (SQLException e) {
@@ -139,12 +139,12 @@ public class KeyStoreDAOImpl extends KeyStoreDAO {
     @Override
     public void updateKeyStore(KeyStoreModel keyStoreModel) throws SecurityConfigException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(true)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(true)) {
             try {
                 processUpdateKeyStore(connection, keyStoreModel);
-                IdentityDatabaseUtil.commitTransaction(connection);
+                KeyStoreDatabaseUtil.commitTransaction(connection);
             } catch (SQLException e) {
-                IdentityDatabaseUtil.rollbackTransaction(connection);
+                KeyStoreDatabaseUtil.rollbackTransaction(connection);
                 // TODO: Check whether this exception type is okay. Also see if we need to use a server exception type. i.e something like SecurityConfigServerException
                 throw new SecurityConfigException("Error while updating key store.", e);
             }
@@ -157,7 +157,7 @@ public class KeyStoreDAOImpl extends KeyStoreDAO {
     @Override
     public void addPubCertIdToKeyStore(String fileName, String pubCertId) throws SecurityConfigException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(true)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(true)) {
             try (NamedPreparedStatement statement = new NamedPreparedStatement(connection,
                     KeyStoreDAOConstants.SqlQueries.ADD_PUB_CERT_ID_TO_KEY_STORE)) {
                 statement.setString(KeyStoreTableColumns.PUB_CERT_ID, pubCertId);
@@ -166,9 +166,9 @@ public class KeyStoreDAOImpl extends KeyStoreDAO {
                 statement.setString(KeyStoreTableColumns.TENANT_UUID, tenantUUID);
                 statement.executeUpdate();
 
-                IdentityDatabaseUtil.commitTransaction(connection);
+                KeyStoreDatabaseUtil.commitTransaction(connection);
             } catch (SQLException e) {
-                IdentityDatabaseUtil.rollbackTransaction(connection);
+                KeyStoreDatabaseUtil.rollbackTransaction(connection);
                 throw new SecurityConfigException("Error while linking public certificate to key store.", e);
             }
         } catch (SQLException e) {
@@ -179,7 +179,7 @@ public class KeyStoreDAOImpl extends KeyStoreDAO {
     @Override
     public Optional<String> getPubCertIdFromKeyStore(String fileName) throws SecurityConfigException {
 
-        try (Connection connection = IdentityDatabaseUtil.getDBConnection(false)) {
+        try (Connection connection = KeyStoreDatabaseUtil.getDBConnection(false)) {
             try (NamedPreparedStatement statement = new NamedPreparedStatement(connection,
                     KeyStoreDAOConstants.SqlQueries.GET_PUB_CERT_ID_OF_KEY_STORE)) {
                 statement.setString(KeyStoreTableColumns.FILE_NAME, fileName);
