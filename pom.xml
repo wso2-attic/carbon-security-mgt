@@ -170,35 +170,35 @@
             <dependency>
                 <groupId>org.wso2.carbon.security.mgt</groupId>
                 <artifactId>org.wso2.carbon.security.mgt</artifactId>
-                <version>${carbon.security.mgt.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.security.mgt</groupId>
                 <artifactId>org.wso2.carbon.security.mgt.ui</artifactId>
-                <version>${carbon.security.mgt.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.security.mgt</groupId>
                 <artifactId>org.wso2.carbon.security.mgt.feature</artifactId>
-                <version>${carbon.security.mgt.version}</version>
+                <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.security.mgt</groupId>
                 <artifactId>org.wso2.carbon.security.mgt.server.feature</artifactId>
-                <version>${carbon.security.mgt.version}</version>
+                <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.security.mgt</groupId>
                 <artifactId>org.wso2.carbon.security.mgt.ui.feature</artifactId>
-                <version>${carbon.security.mgt.version}</version>
+                <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.security.mgt</groupId>
                 <artifactId>org.wso2.carbon.security.mgt.stub</artifactId>
-                <version>${carbon.security.mgt.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
@@ -451,9 +451,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Carbon Security Mgt version -->
-        <carbon.security.mgt.version>${project.version}</carbon.security.mgt.version>
         <carbon.security.mgt.package.import.version.range>[1.0.0, 2.0.0)</carbon.security.mgt.package.import.version.range>
-        <carbon.security.mgt.package.export.version>${carbon.security.mgt.version}</carbon.security.mgt.package.export.version>
 
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.9.11</carbon.kernel.version>
