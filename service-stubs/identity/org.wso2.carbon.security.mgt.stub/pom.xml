@@ -47,7 +47,7 @@
                             org.wso2.carbon.identity.sts.common.stub.config.* ;
                             version="${carbon.identity.package.export.version}",
                             org.wso2.carbon.security.mgt.stub.*;
-                            version="${carbon.security.mgt.package.export.version}"
+                            version="${project.version}"
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
